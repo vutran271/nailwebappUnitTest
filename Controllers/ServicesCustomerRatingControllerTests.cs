@@ -1,10 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Castle.Core.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using Moq;
 using nailmvc2.Controllers;
 using nailmvc2.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,20 +18,19 @@ namespace nailmvc2.Controllers.Tests
 {
     public class SaveCustomerRatingControllerTests
     {
+
         [Theory]
         [InlineData(606060, "{ Result = save success }", "111111")]
         [InlineData(60346060, "{ Result = unsuccess }", "111111")]
         [InlineData(606060, "{ Result = unsuccess }", "")]
 
         public void SaveCustomerRatingControllerTest_query(long CId, string ExpectedValue, string BId)
-        {
+        {           
             // make a fake return data from sql
 
             var data = new List<CustomerInfomation> {
                 new CustomerInfomation { BusinessID="111111", CustomerID=606060, BusinessName="merchant2",CustomerComment="bad comment b", CustomerStarRating = 1},
                 new CustomerInfomation { BusinessID="111111", CustomerID=616060, BusinessName="merchant2",CustomerComment="bad comment", CustomerStarRating = 1}
-
-
             }.AsQueryable();
 
 
@@ -42,7 +44,8 @@ namespace nailmvc2.Controllers.Tests
             mockSet.As<IQueryable<CustomerInfomation>>().Setup(s => s.GetEnumerator())
                 .Returns(data.GetEnumerator());
 
-            var mo = new Mock<Entities>(MockBehavior.Loose);
+            Debug.Write("THE TYPE OF MOCK: " + mockSet.GetType().ToString());
+            var mo = new Mock<Entities>();
             mo.Setup(s => s.CustomerInfomations).Returns(mockSet.Object);
             mo.Setup(s => s.SaveChanges()).Returns(1);
 
